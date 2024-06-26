@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management App - Edit Task</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <a href="./" class="btn btn-primary mb-3">Go Home</a>
+        <h2>Edit Task</h2>
+        <form id="edit-task-form">
+            <input type="hidden" id="task-id" name="id" value=""> <!-- Dynamically set task ID -->
+            <div class="form-group">
+                <label for="edit-task-name">Task Name</label>
+                <input type="text" class="form-control" id="edit-task-name" name="name" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Task</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Your custom JavaScript -->
+    <script>
+        $(document).ready(function() {
+            // Function to load task details for editing
+            function loadTaskDetails(taskId) {
+                $.ajax({
+                    url: 'http://127.0.0.1:8000/api/tasks/' + taskId, // Laravel route for fetching task details
+                    type: 'GET',
+                    success: function(response) {
+                        $('#task-id').val(response.id); // Set task ID in hidden input
+                        $('#edit-task-name').val(response.name); // Populate form field with task name
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error);
+                    }
+                });
+            }
+
+            // Extract task ID from URL query string or any other method and load task details
+            var urlParams = new URLSearchParams(window.location.search);
+            var taskId = urlParams.get('id'); // Get task ID from URL parameter 'id'
+
+            if (taskId) {
+                loadTaskDetails(taskId); // Load task details if task ID is present
+            } else {
+                console.error('Task ID not found in URL');
+            }
+
+            // Handle form submission for task update
+            $('#edit-task-form').submit(function(event) {
+                event.preventDefault();
+                var formData = $(this).serialize();
+                
+                $.ajax({
+                    url: 'http://127.0.0.1:8000/api/tasks/' + $('#task-id').val(), // Laravel route for updating task
+                    type: 'PUT',
+                    data: formData,
+                    success: function(response) {
+                        alert('Task updated successfully!');
+                        $('#edit-task-form')[0].reset(); // Clear form fields
+                        // Optionally, reload task list or navigate to task listing page
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error);
+                        alert('Error updating task. Please try again.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
